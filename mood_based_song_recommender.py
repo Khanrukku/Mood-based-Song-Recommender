@@ -16,7 +16,7 @@ def get_songs_by_mood(mood):
             {"title": "Tum Mile", "artist": "Pritam", "link": "https://open.wynk.in/CrBmWFoJbeb?~destination=any&~feature=wynk_share&~content_id=srch_sonymusic_A10328E0005006453G"}
         ],
         "energetic": [
-            {"title": "Slow Motion", "artist": "Shankar Ehsaan Loy", "link": "https://open.wynk.in/uO9UIJIDbeb?~destination=any&~feature=wynk_share&~content_id=srch_sonymusic_A10328E0006497806L"},
+            {"title": "Slow Motion Angreza", "artist": "Shankar Ehsaan Loy", "link": "https://open.wynk.in/uO9UIJIDbeb?~destination=any&~feature=wynk_share&~content_id=srch_sonymusic_A10328E0006497806L"},
             {"title": "Nagada Nagada", "artist": "Pritam", "link": "https://open.wynk.in/MD9aCofHbeb?~destination=any&~feature=wynk_share&~content_id=srch_hungama_286256"},
             {"title": "Matarghasti", "artist": "Mohit Chauhan", "link": "https://open.wynk.in/y7NLooQJbeb?~destination=any&~feature=wynk_share&~content_id=srch_hungama_16537839"}
         ]
