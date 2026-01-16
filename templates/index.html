@@ -1,1 +1,403 @@
 
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mood-Based Song Recommender</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #1e3c72 0%, #2a5298 50%, #7e22ce 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+        
+        .container {
+            max-width: 900px;
+            margin: 0 auto;
+            background: rgba(255, 255, 255, 0.95);
+            border-radius: 25px;
+            padding: 40px;
+            box-shadow: 0 25px 70px rgba(0,0,0,0.4);
+        }
+        
+        header {
+            text-align: center;
+            margin-bottom: 40px;
+        }
+        
+        h1 {
+            color: #1e3c72;
+            font-size: 3em;
+            margin-bottom: 10px;
+            background: linear-gradient(135deg, #1e3c72, #7e22ce);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+        
+        .subtitle {
+            color: #666;
+            font-size: 1.1em;
+            font-style: italic;
+        }
+        
+        .input-section {
+            margin-bottom: 30px;
+        }
+        
+        label {
+            display: block;
+            margin-bottom: 10px;
+            color: #333;
+            font-weight: 600;
+            font-size: 1.1em;
+        }
+        
+        textarea {
+            width: 100%;
+            padding: 20px;
+            border: 2px solid #e0e0e0;
+            border-radius: 15px;
+            font-size: 16px;
+            resize: vertical;
+            min-height: 120px;
+            font-family: inherit;
+            transition: border-color 0.3s;
+        }
+        
+        textarea:focus {
+            outline: none;
+            border-color: #7e22ce;
+            box-shadow: 0 0 0 3px rgba(126, 34, 206, 0.1);
+        }
+        
+        .btn-recommend {
+            width: 100%;
+            padding: 18px;
+            background: linear-gradient(135deg, #1e3c72, #7e22ce);
+            color: white;
+            border: none;
+            border-radius: 15px;
+            font-size: 18px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            margin-top: 15px;
+        }
+        
+        .btn-recommend:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 10px 25px rgba(126, 34, 206, 0.4);
+        }
+        
+        .btn-recommend:active {
+            transform: translateY(0);
+        }
+        
+        .results {
+            margin-top: 40px;
+        }
+        
+        .emotion-info {
+            background: linear-gradient(135deg, #f0f4ff, #e9d5ff);
+            padding: 20px;
+            border-radius: 15px;
+            margin-bottom: 25px;
+            border-left: 5px solid #7e22ce;
+        }
+        
+        .emotion-badge {
+            display: inline-block;
+            padding: 10px 20px;
+            background: #7e22ce;
+            color: white;
+            border-radius: 25px;
+            font-weight: bold;
+            margin-right: 15px;
+            font-size: 1.1em;
+        }
+        
+        .confidence {
+            display: inline-block;
+            color: #666;
+            font-size: 0.95em;
+        }
+        
+        .song-card {
+            background: white;
+            border: 2px solid #f0f0f0;
+            border-radius: 15px;
+            padding: 25px;
+            margin-bottom: 20px;
+            transition: all 0.3s;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .song-card::before {
+            content: '';
+            position: absolute;
+            left: 0;
+            top: 0;
+            height: 100%;
+            width: 5px;
+            background: linear-gradient(135deg, #1e3c72, #7e22ce);
+        }
+        
+        .song-card:hover {
+            transform: translateX(10px);
+            box-shadow: 0 10px 30px rgba(0,0,0,0.15);
+            border-color: #7e22ce;
+        }
+        
+        .song-title {
+            font-size: 1.4em;
+            font-weight: bold;
+            color: #1e3c72;
+            margin-bottom: 8px;
+        }
+        
+        .song-artist {
+            font-size: 1.1em;
+            color: #666;
+            margin-bottom: 15px;
+        }
+        
+        .song-meta {
+            display: flex;
+            gap: 15px;
+            flex-wrap: wrap;
+            margin-top: 12px;
+        }
+        
+        .meta-badge {
+            padding: 6px 12px;
+            background: #f0f4ff;
+            border-radius: 8px;
+            font-size: 0.9em;
+            color: #1e3c72;
+            font-weight: 500;
+        }
+        
+        .match-score {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            background: linear-gradient(135deg, #10b981, #059669);
+            color: white;
+            padding: 8px 15px;
+            border-radius: 20px;
+            font-weight: bold;
+            font-size: 0.95em;
+        }
+        
+        .loading {
+            text-align: center;
+            padding: 40px;
+            color: #7e22ce;
+            font-weight: bold;
+            font-size: 1.2em;
+        }
+        
+        .loading::after {
+            content: '...';
+            animation: dots 1.5s steps(4, end) infinite;
+        }
+        
+        @keyframes dots {
+            0%, 20% { content: '.'; }
+            40% { content: '..'; }
+            60%, 100% { content: '...'; }
+        }
+        
+        .error {
+            background: #fee;
+            border-color: #fcc;
+            color: #c33;
+        }
+        
+        .stats-footer {
+            margin-top: 40px;
+            text-align: center;
+            color: #999;
+            font-size: 0.9em;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>🎵 Mood Music</h1>
+            <p class="subtitle">Emotion-Aware Song Recommendation System</p>
+        </header>
+        
+        <div class="input-section">
+            <label for="moodInput">How are you feeling today?</label>
+            <textarea 
+                id="moodInput" 
+                placeholder="Describe your mood... For example: 'I'm feeling energetic and ready to conquer the world!' or 'Feeling a bit down today, need something comforting'"></textarea>
+            
+            <button class="btn-recommend" onclick="getRecommendations()">
+                🎧 Find My Perfect Playlist
+            </button>
+        </div>
+        
+        <div id="results" class="results"></div>
+        
+        <div class="stats-footer">
+            Powered by NLP & Machine Learning • 10,000+ Songs Database
+        </div>
+    </div>
+    
+    <script>
+        async function getRecommendations() {
+            const userInput = document.getElementById('moodInput').value.trim();
+            const resultsDiv = document.getElementById('results');
+            
+            if (!userInput) {
+                alert('Please describe your mood first!');
+                return;
+            }
+            
+            resultsDiv.innerHTML = '<div class="loading">Analyzing your mood and finding perfect songs</div>';
+            
+            try {
+                const response = await fetch('/recommend', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        text: userInput,
+                        top_n: 5
+                    })
+                });
+                
+                const data = await response.json();
+                
+                if (response.ok) {
+                    displayResults(data);
+                } else {
+                    resultsDiv.innerHTML = `<div class="song-card error">❌ ${data.error}</div>`;
+                }
+            } catch (error) {
+                resultsDiv.innerHTML = '<div class="song-card error">❌ Error connecting to server. Please try again.</div>';
+            }
+        }
+        
+        function displayResults(data) {
+            const resultsDiv = document.getElementById('results');
+            
+            const emotionEmojis = {
+                'happy': '😊',
+                'sad': '😢',
+                'energetic': '⚡',
+                'calm': '😌',
+                'romantic': '💕',
+                'angry': '😠'
+            };
+            
+            const emoji = emotionEmojis[data.detected_emotion] || '🎵';
+            
+            let html = `
+                <div class="emotion-info">
+                    <span class="emotion-badge">${emoji} ${data.detected_emotion.toUpperCase()}</span>
+                    <span class="confidence">Confidence: ${(data.confidence * 100).toFixed(0)}%</span>
+                </div>
+                <h3 style="margin-bottom: 20px; color: #1e3c72;">🎼 Recommended Songs for You:</h3>
+            `;
+            
+            data.recommendations.forEach((song, index) => {
+                const matchScore = (song.match_score * 100).toFixed(0);
+                html += `
+                    <div class="song-card">
+                        <div class="match-score">${matchScore}% Match</div>
+                        <div class="song-title">${index + 1}. ${song.title}</div>
+                        <div class="song-artist">🎤 ${song.artist}</div>
+                        <div class="song-meta">
+                            <span class="meta-badge">Genre: ${song.genre}</span>
+                            <span class="meta-badge">Mood: ${song.emotion}</span>
+                            <span class="meta-badge">Energy: ${(song.energy * 100).toFixed(0)}%</span>
+                            <span class="meta-badge">Valence: ${(song.valence * 100).toFixed(0)}%</span>
+                        </div>
+                    </div>
+                `;
+            });
+            
+            resultsDiv.innerHTML = html;
+        }
+        
+        // Allow Enter key to submit
+        document.getElementById('moodInput').addEventListener('keypress', function(e) {
+            if (e.key === 'Enter' && e.ctrlKey) {
+                getRecommendations();
+            }
+        });
+    </script>
+</body>
+</html>
+```
+
+**Where**: `templates/index.html`
+
+---
+
+### **File 4: `.gitignore`**
+```
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+env/
+venv/
+ENV/
+build/
+develop-eggs/
+dist/
+downloads/
+eggs/
+.eggs/
+lib/
+lib64/
+parts/
+sdist/
+var/
+wheels/
+*.egg-info/
+.installed.cfg
+*.egg
+
+# Environment variables
+.env
+.env.local
+
+# Spotify API keys
+.spotify_cache
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Database
+*.db
+*.sqlite
+*.sqlite3
+
+# Logs
+*.log
